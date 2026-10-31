@@ -11,7 +11,10 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/responsive.css">
 
-  <!-- JavaScript -->
+  <!-- JavaScript Modules -->
+  <script src="js/utils.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/ui.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body class="theme-dark">
@@ -141,6 +144,17 @@
           <!-- Dynamic suggestion items will be injected here -->
         </div>
       </form>
+
+      <!-- Recent Searches Container -->
+      <div id="recent-searches-container" class="recent-searches" aria-label="Recent searches">
+        <span class="recent-searches-label">Recent:</span>
+        <div id="recent-searches-list" class="recent-searches-list" role="list">
+          <span class="recent-searches-empty">No recent searches</span>
+        </div>
+      </div>
+
+      <!-- Search Status & Feedback Message -->
+      <div id="search-status" class="search-status" role="status" aria-live="polite" hidden></div>
     </div>
   </section>
 

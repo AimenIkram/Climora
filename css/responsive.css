@@ -1,43 +1,430 @@
 /* ==========================================================================
-   Climora - Responsive Stylesheet
-   Media queries for responsive layouts across mobile, tablet, and desktop screens.
+   Climora - Responsive Design Stylesheet
+   Fluid layouts across Desktop (1440px+), Laptop (1024px-1439px),
+   Tablet (768px-1023px), and Mobile (375px-767px).
    ========================================================================== */
 
-/* --- Mobile Breakpoints (Small Screens < 640px) --- */
-@media (max-width: 639px) {
-  .header-container {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    text-align: center;
+/* ==========================================================================
+   1. Large Desktop (1440px and wider)
+   ========================================================================== */
+@media (min-width: 1440px) {
+  :root {
+    --container-max-width: 1360px;
+    --font-size-hero: 5.25rem;
   }
 
-  .app-main {
-    padding-block: var(--spacing-lg);
-  }
-}
-
-/* --- Tablet Breakpoints (640px to 1023px) --- */
-@media (min-width: 640px) and (max-width: 1023px) {
-  .container {
-    padding-inline: var(--spacing-lg);
-  }
-}
-
-/* --- Desktop Breakpoints (1024px and up) --- */
-@media (min-width: 1024px) {
   .container {
     padding-inline: var(--spacing-xl);
   }
+
+  .current-weather-card {
+    padding: var(--spacing-3xl);
+  }
+
+  .insights-grid {
+    gap: var(--spacing-lg);
+  }
 }
 
-/* --- Accessibility: Reduced Motion --- */
+/* ==========================================================================
+   2. Standard Laptop & Desktop (1024px to 1439px)
+   ========================================================================== */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .dashboard-layout {
+    gap: var(--spacing-lg);
+  }
+
+  .insights-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .insight-card {
+    padding: var(--spacing-md);
+  }
+
+  .metric-value {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ==========================================================================
+   3. Tablet Devices (768px to 1023px)
+   ========================================================================== */
+@media (max-width: 1023px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .current-weather-card,
+  .hourly-forecast,
+  .weekly-forecast,
+  .insights-section,
+  .favourites-section {
+    grid-column: span 1;
+  }
+
+  .weekly-forecast {
+    padding: var(--spacing-xl);
+  }
+
+  .insights-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .current-weather-body {
+    gap: var(--spacing-lg);
+  }
+
+  .weather-visual-block {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* Small Tablet (768px to 899px) adjustments */
+@media (min-width: 768px) and (max-width: 899px) {
+  .insights-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header-container {
+    gap: var(--spacing-md);
+  }
+}
+
+/* ==========================================================================
+   4. Mobile Devices (Under 768px: 375px - 767px)
+   ========================================================================== */
+@media (max-width: 767px) {
+  /* Container Padding */
+  .container {
+    padding-inline: var(--spacing-md);
+  }
+
+  .app-main {
+    padding-block: var(--spacing-md) var(--spacing-2xl);
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .current-weather-card,
+  .hourly-forecast,
+  .weekly-forecast,
+  .insights-section,
+  .favourites-section {
+    grid-column: span 1;
+  }
+
+  /* Header & Navigation on Mobile */
+  .header-container {
+    height: auto;
+    padding-block: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+
+  .brand-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .brand-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid var(--color-divider);
+    padding-top: var(--spacing-xs);
+  }
+
+  .nav-link {
+    padding: 5px 12px;
+    font-size: var(--font-size-xs);
+  }
+
+  .header-controls {
+    margin-left: auto;
+  }
+
+  .unit-label {
+    min-width: 30px;
+    height: 26px;
+    font-size: 11px;
+  }
+
+  .btn-theme-toggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Search Area on Mobile */
+  .search-section {
+    padding-block: var(--spacing-sm) var(--spacing-xs);
+  }
+
+  .search-input-group {
+    padding: 4px 6px 4px 14px;
+  }
+
+  .search-input {
+    font-size: var(--font-size-xs);
+    padding-block: 6px;
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+  }
+
+  .btn-geo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-search-submit {
+    padding: 7px 16px;
+    font-size: var(--font-size-xs);
+  }
+
+  /* Current Weather Card on Mobile */
+  .current-weather-card {
+    padding: var(--spacing-lg) var(--spacing-md);
+    border-radius: var(--radius-xl);
+  }
+
+  .current-weather-header {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .city-name {
+    font-size: var(--font-size-2xl);
+  }
+
+  .btn-favourite-toggle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .current-weather-body {
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .temp-condition-block {
+    align-items: center;
+  }
+
+  .temperature-display {
+    justify-content: center;
+  }
+
+  .temp-number {
+    font-size: 3.75rem;
+  }
+
+  .temp-degree-symbol {
+    font-size: var(--font-size-3xl);
+  }
+
+  .weather-condition-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .weather-condition-desc {
+    font-size: var(--font-size-sm);
+  }
+
+  .weather-visual-block {
+    width: 96px;
+    height: 96px;
+  }
+
+  .current-weather-footer {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .metric-chip {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+  }
+
+  /* Hourly Forecast Horizontal Scroll on Mobile */
+  .hourly-forecast-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--spacing-md);
+  }
+
+  .hourly-card {
+    min-width: 90px;
+    scroll-snap-align: start;
+    padding: var(--spacing-md) var(--spacing-xs);
+  }
+
+  /* Weekly Forecast on Mobile */
+  .weekly-forecast {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-xl);
+  }
+
+  .daily-forecast-item {
+    grid-template-columns: 75px 1fr auto auto;
+    gap: var(--spacing-sm);
+    padding: 10px 8px;
+  }
+
+  .daily-day-label {
+    font-size: var(--font-size-xs);
+  }
+
+  .daily-condition-name {
+    font-size: 11px;
+    max-width: 70px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .daily-precip-indicator {
+    font-size: 11px;
+  }
+
+  .daily-temp-range {
+    font-size: var(--font-size-xs);
+    min-width: 50px;
+  }
+
+  /* Weather Insights 2-Column Grid on Mobile */
+  .insights-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .insight-card {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+  }
+
+  .metric-value {
+    font-size: var(--font-size-xl);
+  }
+
+  .metric-caption {
+    font-size: 11px;
+  }
+
+  /* Favourites Section on Mobile */
+  .favourites-section {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-xl);
+  }
+
+  .favourites-section .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .btn-add-favourite {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .favourites-empty-state {
+    padding: var(--spacing-xl) var(--spacing-sm);
+  }
+
+  .empty-state-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .empty-state-description {
+    font-size: var(--font-size-xs);
+  }
+
+  /* Footer on Mobile */
+  .app-footer {
+    padding-block: var(--spacing-xl);
+  }
+
+  .footer-description {
+    font-size: 11px;
+  }
+}
+
+/* Extra Small Screens (< 380px) */
+@media (max-width: 379px) {
+  .temp-number {
+    font-size: 3.25rem;
+  }
+
+  .daily-condition-name {
+    display: none;
+  }
+
+  .daily-forecast-item {
+    grid-template-columns: 60px auto auto auto;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   5. Accessibility: Reduced Motion
+   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+
+  body::before,
+  body::after,
+  body.weather-clear::before,
+  body.weather-clear::after,
+  body.weather-cloudy::before,
+  body.weather-cloudy::after,
+  body.weather-rainy::before,
+  body.weather-rainy::after,
+  body.weather-stormy::before,
+  body.weather-stormy::after,
+  body.weather-snowy::before,
+  body.weather-snowy::after,
+  body.weather-foggy::before,
+  body.weather-foggy::after,
+  .weather-icon-container,
+  .current-weather-card,
+  .hourly-forecast,
+  .weekly-forecast,
+  .insights-section,
+  .favourites-section {
+    animation: none !important;
+  }
 }
+

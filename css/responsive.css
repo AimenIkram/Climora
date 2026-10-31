@@ -1,0 +1,43 @@
+/* ==========================================================================
+   Climora - Responsive Stylesheet
+   Media queries for responsive layouts across mobile, tablet, and desktop screens.
+   ========================================================================== */
+
+/* --- Mobile Breakpoints (Small Screens < 640px) --- */
+@media (max-width: 639px) {
+  .header-container {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+
+  .app-main {
+    padding-block: var(--spacing-lg);
+  }
+}
+
+/* --- Tablet Breakpoints (640px to 1023px) --- */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .container {
+    padding-inline: var(--spacing-lg);
+  }
+}
+
+/* --- Desktop Breakpoints (1024px and up) --- */
+@media (min-width: 1024px) {
+  .container {
+    padding-inline: var(--spacing-xl);
+  }
+}
+
+/* --- Accessibility: Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

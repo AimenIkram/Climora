@@ -7,6 +7,7 @@
 const WeatherAPI = {
   GEOCODING_BASE_URL: 'https://geocoding-api.open-meteo.com/v1/search',
   FORECAST_BASE_URL: 'https://api.open-meteo.com/v1/forecast',
+  AIR_QUALITY_BASE_URL: 'https://air-quality-api.open-meteo.com/v1/air-quality',
 
   /**
    * Queries the Open-Meteo Geocoding API to resolve a city name
@@ -69,12 +70,12 @@ const WeatherAPI = {
   },
 
   /**
-   * Fetches current meteorological conditions and daily extremes
+   * Fetches current meteorological conditions, hourly forecast (24h+), and 5-day daily forecast
    * from the Open-Meteo Forecast API for specified coordinates.
    *
    * @param {number} latitude - Decimal latitude
    * @param {number} longitude - Decimal longitude
-   * @returns {Promise<Object>} Formatted current and daily forecast data
+   * @returns {Promise<Object>} Formatted current, hourly, and daily forecast data
    * @throws {Error} Descriptive error on network or service issues
    */
   async fetchWeather(latitude, longitude) {
@@ -82,13 +83,15 @@ const WeatherAPI = {
       throw new Error('Invalid geographical coordinates provided for weather fetch.');
     }
 
-    // Specify required meteorological parameters as requested
+    // Specify required meteorological parameters for Phase 07
     const params = new URLSearchParams({
       latitude: latitude.toString(),
       longitude: longitude.toString(),
       current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m',
-      daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset',
-      timezone: 'auto'
+      hourly: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,visibility,uv_index',
+      daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset',
+      timezone: 'auto',
+      forecast_days: '5'
     });
 
     const endpoint = `${this.FORECAST_BASE_URL}?${params.toString()}`;
@@ -118,5 +121,93 @@ const WeatherAPI = {
     }
 
     return data;
+  },
+
+  /**
+   * Fetches air quality metrics and index measurements from Open-Meteo Air Quality API.
+   *
+   * @param {number} latitude - Decimal latitude
+   * @param {number} longitude - Decimal longitude
+   * @returns {Promise<Object>} Air quality data containing hourly pollutants & indices
+   * @throws {Error} Descriptive error on network or service issues
+   */
+  async fetchAirQuality(latitude, longitude) {
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      throw new Error('Invalid geographical coordinates provided for air quality fetch.');
+    }
+
+    const params = new URLSearchParams({
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+      hourly: 'pm2_5,pm10,nitrogen_dioxide,ozone,european_aqi,us_aqi',
+      timezone: 'auto',
+      forecast_days: '5'
+    });
+
+    const endpoint = `${this.AIR_QUALITY_BASE_URL}?${params.toString()}`;
+
+    let response;
+    try {
+      response = await fetch(endpoint);
+    } catch (networkError) {
+      throw new Error('Network error while retrieving air quality data.');
+    }
+
+    if (!response.ok) {
+      throw new Error(`Air Quality service responded with error (${response.status} ${response.statusText}).`);
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error('Failed to parse air quality data.');
+    }
+
+    return data;
+  },
+
+  /**
+   * Reverse-geocodes coordinates into human-readable city and country names.
+   * Utilizes client-side reverse geocoding with timezone fallback.
+   *
+   * @param {number} latitude - Decimal latitude
+   * @param {number} longitude - Decimal longitude
+   * @param {string} [timezone=''] - Optional timezone fallback from weather payload
+   * @returns {Promise<Object>} { name, country, latitude, longitude }
+   */
+  async reverseGeocode(latitude, longitude, timezone = '') {
+    try {
+      const endpoint = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+      const response = await fetch(endpoint);
+      if (response.ok) {
+        const data = await response.json();
+        const city = data.city || data.locality || data.principalSubdivision;
+        const country = data.countryCode || data.countryName;
+        if (city) {
+          return {
+            name: city,
+            country: country ? country.toUpperCase() : 'GPS',
+            latitude,
+            longitude
+          };
+        }
+      }
+    } catch {
+      // Gracefully continue to fallback if network or service fails
+    }
+
+    let cityName = 'Current Location';
+    if (timezone && timezone.includes('/')) {
+      const parts = timezone.split('/');
+      cityName = parts[parts.length - 1].replace(/_/g, ' ');
+    }
+
+    return {
+      name: cityName,
+      country: 'GPS',
+      latitude,
+      longitude
+    };
   }
 };

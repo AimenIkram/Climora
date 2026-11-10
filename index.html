@@ -11,13 +11,18 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/responsive.css">
 
+  <!-- Third-party Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- JavaScript Modules -->
   <script src="js/utils.js" defer></script>
+  <script src="js/storage.js" defer></script>
+  <script src="js/location.js" defer></script>
   <script src="js/api.js" defer></script>
   <script src="js/ui.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
-<body class="theme-dark">
+<body class="atmosphere-dark atmosphere-clear-night">
 
   <!-- =========================================================================
        1. Header & Navigation Section
@@ -46,6 +51,9 @@
             <a href="#overview" class="nav-link active" aria-current="page">Overview</a>
           </li>
           <li class="nav-item">
+            <a href="#comparison" class="nav-link">Compare</a>
+          </li>
+          <li class="nav-item">
             <a href="#favourites" class="nav-link">Favourites</a>
           </li>
         </ul>
@@ -63,26 +71,24 @@
           <label for="unit-fahrenheit" class="unit-label" title="Fahrenheit">°F</label>
         </fieldset>
 
-        <!-- Theme Toggle Control -->
-        <button type="button" id="theme-toggle" class="btn-theme-toggle" aria-label="Toggle visual theme between dark and light" aria-pressed="false">
-          <!-- Sun Icon (for Dark Theme) -->
-          <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <!-- Moon Icon (for Light Theme) -->
-          <svg class="theme-icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-          <span class="sr-only">Switch appearance theme</span>
-        </button>
+        <!-- Live Weather-Reactive Atmosphere Indicator Badge -->
+        <div id="atmosphere-badge" class="atmosphere-badge" title="Live weather-reactive sky atmosphere" role="status" aria-live="polite">
+          <span id="atmosphere-icon" class="atmosphere-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </span>
+          <span id="atmosphere-name" class="atmosphere-name">Live Sky</span>
+          <button type="button" id="theme-toggle" class="sr-only" aria-hidden="true" tabindex="-1">Toggle</button>
+        </div>
 
       </div>
 
@@ -94,56 +100,65 @@
        ========================================================================= -->
   <section class="search-section" aria-label="Location Search">
     <div class="container">
-      <form id="search-form" class="search-form" role="search">
-        <label for="search-input" class="search-label sr-only">Search for a city or region</label>
-        
-        <div class="search-input-group">
-          <!-- Search Icon -->
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-
-          <!-- Search Input Field -->
-          <input
-            type="search"
-            id="search-input"
-            name="city-search"
-            class="search-input"
-            placeholder="Search city, region, or country..."
-            autocomplete="off"
-            aria-autocomplete="list"
-            aria-controls="search-suggestions"
-            aria-expanded="false"
-            required
-          >
-
-          <!-- Current Geolocation Button -->
-          <button type="button" id="btn-geolocation" class="btn-geo" aria-label="Use current GPS location" title="Use current location">
-            <svg class="geo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+      <div class="search-bar-row">
+        <form id="search-form" class="search-form" role="search">
+          <label for="search-input" class="search-label sr-only">Search for a city or region</label>
+          
+          <div class="search-input-group">
+            <!-- Search Icon -->
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <span class="sr-only">Locate my current position</span>
-          </button>
 
-          <!-- Search Submit Button -->
-          <button type="submit" id="btn-search-submit" class="btn-search-submit" aria-label="Submit search">
-            <span class="btn-label">Search</span>
-          </button>
-        </div>
+            <!-- Search Input Field -->
+            <input
+              type="search"
+              id="search-input"
+              name="city-search"
+              class="search-input"
+              placeholder="Search city, region, or country..."
+              autocomplete="off"
+              aria-autocomplete="list"
+              aria-controls="search-suggestions"
+              aria-expanded="false"
+              required
+            >
 
-        <!-- Accessible Auto-Suggestions Container (Populated via JS) -->
-        <div
-          id="search-suggestions"
-          class="search-suggestions"
-          role="listbox"
-          aria-label="City search suggestions"
-          aria-live="polite"
-          hidden
+            <!-- Search Submit Button -->
+            <button type="submit" id="btn-search-submit" class="btn-search-submit" aria-label="Submit search">
+              <span class="btn-label">Search</span>
+            </button>
+          </div>
+
+          <!-- Accessible Auto-Suggestions Container (Populated via JS) -->
+          <div
+            id="search-suggestions"
+            class="search-suggestions"
+            role="listbox"
+            aria-label="City search suggestions"
+            aria-live="polite"
+            hidden
+          >
+            <!-- Dynamic suggestion items will be injected here -->
+          </div>
+        </form>
+
+        <!-- Prominent Geolocation Action Button -->
+        <button
+          type="button"
+          id="btn-geolocation"
+          class="btn-location-action"
+          aria-label="Use current location to display weather"
+          title="Use current location"
         >
-          <!-- Dynamic suggestion items will be injected here -->
-        </div>
-      </form>
+          <svg class="location-pin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span class="btn-location-text">Use My Location</span>
+        </button>
+      </div>
 
       <!-- Recent Searches Container -->
       <div id="recent-searches-container" class="recent-searches" aria-label="Recent searches">
@@ -151,6 +166,16 @@
         <div id="recent-searches-list" class="recent-searches-list" role="list">
           <span class="recent-searches-empty">No recent searches</span>
         </div>
+        <button
+          type="button"
+          id="btn-clear-recent"
+          class="btn-clear-recent"
+          aria-label="Clear recent searches history"
+          title="Clear recent searches"
+          hidden
+        >
+          Clear
+        </button>
       </div>
 
       <!-- Search Status & Feedback Message -->
@@ -242,6 +267,15 @@
       </section>
 
       <!-- =====================================================================
+           3b. Smart Weather Recommendations Section
+           ===================================================================== -->
+      <section id="recommendations-section" class="recommendations-section" aria-label="Atmospheric Weather Advisory">
+        <div id="recommendations-list" class="recommendations-list" role="region" aria-live="polite">
+          <!-- Populated dynamically via JavaScript -->
+        </div>
+      </section>
+
+      <!-- =====================================================================
            4. Hourly Forecast Section
            ===================================================================== -->
       <section id="hourly-forecast-section" class="forecast-section hourly-forecast" aria-labelledby="hourly-heading">
@@ -251,7 +285,7 @@
         </header>
 
         <div class="hourly-forecast-container" role="region" aria-label="Hourly forecast cards horizontal scroll" tabindex="0">
-          <ol class="hourly-forecast-list">
+          <ol id="hourly-forecast-list" class="hourly-forecast-list">
 
             <!-- Hourly Card 1 -->
             <li class="hourly-card">
@@ -272,98 +306,23 @@
               </div>
             </li>
 
-            <!-- Hourly Card 2 -->
-            <li class="hourly-card">
-              <time class="hourly-time" datetime="">--:--</time>
-              <div class="hourly-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                </svg>
-              </div>
-              <span class="hourly-temp">--&deg;</span>
-              <div class="hourly-precip" title="Precipitation probability">
-                <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
-                <span class="precip-value">--%</span>
-              </div>
-            </li>
-
-            <!-- Hourly Card 3 -->
-            <li class="hourly-card">
-              <time class="hourly-time" datetime="">--:--</time>
-              <div class="hourly-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="8" y1="19" x2="8" y2="21"></line>
-                  <line x1="8" y1="13" x2="8" y2="15"></line>
-                  <line x1="16" y1="19" x2="16" y2="21"></line>
-                  <line x1="16" y1="13" x2="16" y2="15"></line>
-                  <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
-                </svg>
-              </div>
-              <span class="hourly-temp">--&deg;</span>
-              <div class="hourly-precip" title="Precipitation probability">
-                <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
-                <span class="precip-value">--%</span>
-              </div>
-            </li>
-
-            <!-- Hourly Card 4 -->
-            <li class="hourly-card">
-              <time class="hourly-time" datetime="">--:--</time>
-              <div class="hourly-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                </svg>
-              </div>
-              <span class="hourly-temp">--&deg;</span>
-              <div class="hourly-precip" title="Precipitation probability">
-                <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
-                <span class="precip-value">--%</span>
-              </div>
-            </li>
-
-            <!-- Hourly Card 5 -->
-            <li class="hourly-card">
-              <time class="hourly-time" datetime="">--:--</time>
-              <div class="hourly-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                </svg>
-              </div>
-              <span class="hourly-temp">--&deg;</span>
-              <div class="hourly-precip" title="Precipitation probability">
-                <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
-                <span class="precip-value">--%</span>
-              </div>
-            </li>
-
-            <!-- Hourly Card 6 -->
-            <li class="hourly-card">
-              <time class="hourly-time" datetime="">--:--</time>
-              <div class="hourly-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-              </div>
-              <span class="hourly-temp">--&deg;</span>
-              <div class="hourly-precip" title="Precipitation probability">
-                <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
-                <span class="precip-value">--%</span>
-              </div>
-            </li>
-
           </ol>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           4b. Temperature Chart Section
+           ===================================================================== -->
+      <section id="temperature-chart-section" class="forecast-section chart-section" aria-labelledby="chart-heading">
+        <header class="section-header">
+          <h2 id="chart-heading" class="section-title">Temperature Trend</h2>
+          <span class="section-subtitle">Upcoming 24-hour meteorological projection</span>
+        </header>
+
+        <div class="chart-card">
+          <div class="chart-wrapper">
+            <canvas id="temperature-chart" aria-label="Upcoming 24-hour temperature chart" role="img"></canvas>
+          </div>
         </div>
       </section>
 
@@ -376,128 +335,21 @@
           <span class="section-subtitle">Extended weekly meteorological forecast</span>
         </header>
 
-        <ul class="weekly-forecast-list" role="list">
+        <ul id="weekly-forecast-list" class="weekly-forecast-list" role="list">
 
-          <!-- Day 1 -->
+          <!-- Day 1 Placeholder -->
           <li class="daily-forecast-item">
-            <span class="daily-day-label">Monday</span>
+            <div class="daily-date-col">
+              <span class="daily-day-label">Loading...</span>
+              <span class="daily-calendar-date">--</span>
+            </div>
             <div class="daily-condition-group">
               <div class="daily-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
               </div>
-              <span class="daily-condition-name">Condition</span>
-            </div>
-            <div class="daily-precip-indicator" title="Probability of rain">
-              <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-              <span class="daily-precip-value">--%</span>
-            </div>
-            <div class="daily-temp-range">
-              <span class="temp-high" title="Expected High">--&deg;</span>
-              <span class="temp-separator" aria-hidden="true">/</span>
-              <span class="temp-low" title="Expected Low">--&deg;</span>
-            </div>
-          </li>
-
-          <!-- Day 2 -->
-          <li class="daily-forecast-item">
-            <span class="daily-day-label">Tuesday</span>
-            <div class="daily-condition-group">
-              <div class="daily-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                </svg>
-              </div>
-              <span class="daily-condition-name">Condition</span>
-            </div>
-            <div class="daily-precip-indicator" title="Probability of rain">
-              <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-              <span class="daily-precip-value">--%</span>
-            </div>
-            <div class="daily-temp-range">
-              <span class="temp-high" title="Expected High">--&deg;</span>
-              <span class="temp-separator" aria-hidden="true">/</span>
-              <span class="temp-low" title="Expected Low">--&deg;</span>
-            </div>
-          </li>
-
-          <!-- Day 3 -->
-          <li class="daily-forecast-item">
-            <span class="daily-day-label">Wednesday</span>
-            <div class="daily-condition-group">
-              <div class="daily-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="8" y1="19" x2="8" y2="21"></line>
-                  <line x1="8" y1="13" x2="8" y2="15"></line>
-                  <line x1="16" y1="19" x2="16" y2="21"></line>
-                  <line x1="16" y1="13" x2="16" y2="15"></line>
-                  <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
-                </svg>
-              </div>
-              <span class="daily-condition-name">Condition</span>
-            </div>
-            <div class="daily-precip-indicator" title="Probability of rain">
-              <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-              <span class="daily-precip-value">--%</span>
-            </div>
-            <div class="daily-temp-range">
-              <span class="temp-high" title="Expected High">--&deg;</span>
-              <span class="temp-separator" aria-hidden="true">/</span>
-              <span class="temp-low" title="Expected Low">--&deg;</span>
-            </div>
-          </li>
-
-          <!-- Day 4 -->
-          <li class="daily-forecast-item">
-            <span class="daily-day-label">Thursday</span>
-            <div class="daily-condition-group">
-              <div class="daily-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                </svg>
-              </div>
-              <span class="daily-condition-name">Condition</span>
-            </div>
-            <div class="daily-precip-indicator" title="Probability of rain">
-              <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-              <span class="daily-precip-value">--%</span>
-            </div>
-            <div class="daily-temp-range">
-              <span class="temp-high" title="Expected High">--&deg;</span>
-              <span class="temp-separator" aria-hidden="true">/</span>
-              <span class="temp-low" title="Expected Low">--&deg;</span>
-            </div>
-          </li>
-
-          <!-- Day 5 -->
-          <li class="daily-forecast-item">
-            <span class="daily-day-label">Friday</span>
-            <div class="daily-condition-group">
-              <div class="daily-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                </svg>
-              </div>
-              <span class="daily-condition-name">Condition</span>
+              <span class="daily-condition-name">Loading forecast</span>
             </div>
             <div class="daily-precip-indicator" title="Probability of rain">
               <svg class="precip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -642,19 +494,75 @@
           </article>
 
           <!-- 8. Air Quality Card -->
-          <article class="insight-card" id="card-air-quality" aria-labelledby="metric-aqi-title">
-            <header class="card-header">
-              <svg class="insight-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M8 19h12a4 4 0 0 0 0-8h-1.26A8 8 0 1 0 4 17.25"></path>
-              </svg>
-              <h3 id="metric-aqi-title" class="metric-title">Air Quality</h3>
+          <article class="insight-card card-air-quality" id="card-air-quality" aria-labelledby="metric-aqi-title">
+            <header class="card-header card-header-aqi">
+              <div class="card-header-left">
+                <svg class="insight-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 19h12a4 4 0 0 0 0-8h-1.26A8 8 0 1 0 4 17.25"></path>
+                </svg>
+                <h3 id="metric-aqi-title" class="metric-title">Air Quality</h3>
+              </div>
+              <span id="metric-aqi-scale" class="aqi-scale-badge" title="Active Air Quality Reporting Standard">US AQI</span>
             </header>
             <div class="card-body">
-              <span id="metric-aqi-value" class="metric-value">-- AQI</span>
-              <p id="metric-aqi-status" class="metric-caption">Rating: Moderate</p>
+              <div class="aqi-main-row">
+                <span id="metric-aqi-value" class="metric-value">--</span>
+                <span id="metric-aqi-status" class="aqi-status-pill status-unavailable">Loading</span>
+              </div>
+              <div class="aqi-pollutants-list" id="metric-aqi-pollutants">
+                <span class="pollutant-chip">PM2.5: <strong id="metric-pm25">--</strong> &mu;g/m&sup3;</span>
+                <span class="pollutant-chip">PM10: <strong id="metric-pm10">--</strong> &mu;g/m&sup3;</span>
+              </div>
             </div>
           </article>
 
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           6b. City Comparison Section
+           ===================================================================== -->
+      <section id="comparison" class="comparison-section" aria-labelledby="comparison-heading">
+        <header class="section-header comparison-header">
+          <div class="section-header-text">
+            <h2 id="comparison-heading" class="section-title">City Weather Comparison</h2>
+            <span class="section-subtitle">Compare up to 3 locations side by side in real time</span>
+          </div>
+
+          <!-- Comparison Add Search Form -->
+          <form id="comparison-form" class="comparison-form" role="search">
+            <label for="comparison-input" class="sr-only">Add city to comparison</label>
+            <div class="comparison-input-group">
+              <input
+                type="search"
+                id="comparison-input"
+                class="comparison-input"
+                placeholder="Add city to compare (max 3)..."
+                autocomplete="off"
+                required
+              >
+              <button type="submit" id="btn-add-comparison" class="btn-add-comparison" aria-label="Add city to comparison">
+                <span class="btn-text">+ Add City</span>
+              </button>
+            </div>
+          </form>
+        </header>
+
+        <!-- Empty State Container -->
+        <div id="comparison-empty-state" class="comparison-empty-state">
+          <div class="empty-state-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="18" rx="1"></rect>
+            </svg>
+          </div>
+          <p class="empty-state-title">No cities selected for comparison</p>
+          <p class="empty-state-description">Add two or three cities above or select from your favourites to compare temperature, condition, humidity, wind, and UV index side by side.</p>
+        </div>
+
+        <!-- Comparison Cards Dynamic Grid -->
+        <div id="comparison-grid" class="comparison-grid" role="region" aria-label="Side by side meteorological comparison" hidden>
+          <!-- Dynamic comparison cards injected via JavaScript -->
         </div>
       </section>
 
